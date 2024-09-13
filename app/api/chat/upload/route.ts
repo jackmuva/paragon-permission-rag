@@ -10,7 +10,10 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
-    const { base64 }: { base64: string } = await request.json();
+    const data = await request.json();
+    const base64 = data.base64;
+    const fileId = data.fileId;
+
     if (!base64) {
       return NextResponse.json(
         { error: "base64 is required in the request body" },
@@ -23,7 +26,8 @@ export async function POST(request: NextRequest) {
         `StorageContext is empty - call 'npm run generate' to generate the storage first`,
       );
     }
-    return NextResponse.json(await uploadDocument(index, base64));
+
+    return NextResponse.json(await uploadDocument(index, base64, fileId ?? ""));
   } catch (error) {
     console.error("[Upload API]", error);
     return NextResponse.json(
