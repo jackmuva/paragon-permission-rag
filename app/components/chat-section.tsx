@@ -3,9 +3,20 @@
 import { useChat } from "ai/react";
 import { ChatInput, ChatMessages } from "@/app/components/chat-ui/chat";
 import { useClientConfig } from "@/app/components/chat-ui/chat/hooks/use-config";
+import {useEffect, useState} from "react";
 
 export default function ChatSection() {
   const { backend } = useClientConfig();
+  const [headers, setHeader] = useState<any>({"Content-Type": "application/json",})
+
+  useEffect(() => {
+    if(sessionStorage.getItem("jwt")){
+      // @ts-ignore
+      setHeader({...headers, "Authorization": "Bearer " + sessionStorage.getItem("jwt")});
+    }
+  })
+
+
   const {
     messages,
     input,
@@ -18,9 +29,7 @@ export default function ChatSection() {
     setInput,
   } = useChat({
     api: `${backend}/api/chat`,
-    headers: {
-      "Content-Type": "application/json", // using JSON because of vercel/ai 2.2.26
-    },
+    headers: headers,
     onError: (error: unknown) => {
       if (!(error instanceof Error)) throw error;
       const message = JSON.parse(error.message);

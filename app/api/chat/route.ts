@@ -13,6 +13,7 @@ import {
   createStreamTimeout,
 } from "./llamaindex/streaming/events";
 import { LlamaIndexStream } from "./llamaindex/streaming/stream";
+import jwtDecode from "jwt-decode";
 
 initObservability();
 initSettings();
@@ -27,6 +28,14 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
+    const headers = request.headers;
+    let user: string | undefined = undefined;
+
+    if(headers.get("authorization")){
+      const decoded : {sub: string, iat: number, exp: number}= jwtDecode(headers.get("authorization")?.split(" ")[1] ?? "");
+      user = decoded.sub;
+    }
+
     const { messages }: { messages: Message[] } = body;
     const userMessage = messages.pop();
     if (!messages || !userMessage || userMessage.role !== "user") {
