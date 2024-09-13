@@ -14,6 +14,7 @@ import {
 } from "./llamaindex/streaming/events";
 import { LlamaIndexStream } from "./llamaindex/streaming/stream";
 import jwtDecode from "jwt-decode";
+import jwt from "jsonwebtoken";
 
 initObservability();
 initSettings();
@@ -29,12 +30,15 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const headers = request.headers;
-    let user: string | undefined = undefined;
+    let user: string | undefined | (() => string) = undefined;
 
     if(headers.get("authorization")){
-      const decoded : {sub: string, iat: number, exp: number}= jwtDecode(headers.get("authorization")?.split(" ")[1] ?? "");
-      user = decoded.sub;
+      const token = headers.get("authorization")?.split(" ")[1];
+      const verified = jwt.verify(token ?? "", process.env.SIGNING_KEY?.replaceAll("\\n", "\n") ?? "");
+      user = verified.sub;
     }
+
+    console.log(user)
 
     const { messages }: { messages: Message[] } = body;
     const userMessage = messages.pop();
