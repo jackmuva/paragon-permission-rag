@@ -3,18 +3,24 @@
 import { useChat } from "ai/react";
 import { ChatInput, ChatMessages } from "@/app/components/chat-ui/chat";
 import { useClientConfig } from "@/app/components/chat-ui/chat/hooks/use-config";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
+import {AuthenticatedConnectUser} from "@useparagon/connect";
 
-export default function ChatSection() {
+
+interface ChildProps {
+  user: AuthenticatedConnectUser | null,
+}
+const ChatSection: React.FC<ChildProps> = (props) => {
   const { backend } = useClientConfig();
   const [headers, setHeader] = useState<any>({"Content-Type": "application/json",})
 
   useEffect(() => {
+    console.log('in effect');
     if(sessionStorage.getItem("jwt")){
       // @ts-ignore
       setHeader({...headers, "Authorization": "Bearer " + sessionStorage.getItem("jwt")});
     }
-  })
+  }, [props.user]);
 
 
   const {
@@ -58,3 +64,4 @@ export default function ChatSection() {
     </div>
   );
 }
+export default ChatSection;

@@ -34,7 +34,6 @@ const Login: React.FC<ChildProps> = (props) => {
       body: JSON.stringify(usr)
     }).then(function (data) {
       data.json().then((response) => {
-        console.log(response);
         if (response.accessToken) {
           paragon.authenticate(process.env.NEXT_PUBLIC_PARAGON_PROJECT_ID ?? "", response.accessToken);
           sessionStorage.setItem("jwt", response.accessToken);

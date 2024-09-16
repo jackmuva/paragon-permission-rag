@@ -110,6 +110,7 @@ async function getPermittedDocuments(headers: Headers): Promise<Array<string>>{
     const verified = jwt.verify(token ?? "", process.env.SIGNING_KEY?.replaceAll("\\n", "\n") ?? "");
     user = verified.sub;
   }
+  console.log(user);
 
   const fga = getFga();
 

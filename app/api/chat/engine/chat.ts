@@ -21,7 +21,7 @@ export async function createChatEngine(documentIds?: string[]) {
       llm:Settings.llm,
     });
   }
-
+  console.log('using context');
   const retriever = index.asRetriever({
     similarityTopK: process.env.TOP_K ? parseInt(process.env.TOP_K) : 3,
     filters: permissionFilters,

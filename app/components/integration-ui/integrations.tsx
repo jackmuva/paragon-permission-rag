@@ -2,11 +2,14 @@
 
 import { AuthenticatedConnectUser, paragon } from "@useparagon/connect";
 import Login from "@/app/components/integration-ui/login";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IIntegrationMetadata } from "@/node_modules/@useparagon/connect/dist/src/entities/integration.interface";
 
-export default function Integrations(){
-  const [user, setUser] = useState<AuthenticatedConnectUser | null>(null);
+interface ChildProps {
+    user: AuthenticatedConnectUser | null,
+    setUser: (user: AuthenticatedConnectUser | null) => void
+}
+const Integrations: React.FC<ChildProps> = (props) => {
   const [integrationMetadata, setIntegrationMetadata] = useState<Array<IIntegrationMetadata>>([]);
 
   useEffect(() => {
@@ -14,22 +17,22 @@ export default function Integrations(){
       paragon.authenticate(process.env.NEXT_PUBLIC_PARAGON_PROJECT_ID ?? "", sessionStorage.getItem("jwt") ?? "");
       const usr = paragon.getUser();
       if(usr.authenticated){
-        setUser(usr);
+        props.setUser(usr);
       }
     }
   }, []);
 
   useEffect(() => {
     setIntegrationMetadata(paragon.getIntegrationMetadata());
-  }, [user]);
+  }, [props.user]);
 
-  if(user !== null ) {
+  if(props.user !== null ) {
       return (
           <div className={"flex flex-col p-4 space-y-2"}>
             <h1 className={"text-2xl font-mono font-bold"}>Integrations:</h1>
             <div className={"flex justify-center space-x-8"}>
             {integrationMetadata.map((integration: IIntegrationMetadata) => {
-              const integrationEnabled = user?.authenticated && user.integrations[integration.type]?.enabled;
+              const integrationEnabled = props.user?.authenticated && props.user.integrations[integration.type]?.enabled;
               return (
                 <div key={integration.type}
                      className={"flex space-x-2 border-2 border-gray-300 rounded-xl px-4 py-2 items-center justify-between"}>
@@ -50,8 +53,9 @@ export default function Integrations(){
     } else{
     return (
       <div className={"flex justify-center"}>
-        <Login setUser={setUser} />
+        <Login setUser={props.setUser} />
       </div>
     );
   }
 }
+export default Integrations;
