@@ -65,6 +65,10 @@ export async function writeFileRelationship(fga: OpenFgaClient, data: any){
 
 
 export async function getPermittedDocuments(userId: string | undefined | (() => string) = undefined): Promise<Array<string>>{
+    if(userId === undefined){
+        return [];
+    }
+
     const fga = getFga();
 
     const response = await fga.listObjects({
@@ -81,6 +85,10 @@ export async function getPermittedDocuments(userId: string | undefined | (() => 
 }
 
 export async function checkThirdPartyPermissions(documentIds: Array<string>, userId: string | undefined | (() => string) = undefined): Promise<Array<string>>{
+    if(userId === undefined){
+        return [];
+    }
+    console.log("checking third party permissions");
     const permittedIds = []
     const token = signJwt(userId);
 
