@@ -7,20 +7,7 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
     const { data } = await request.json();
     try {
-        const fga = new OpenFgaClient({
-            apiUrl: process.env.FGA_API_URL,
-            storeId: process.env.FGA_STORE_ID,
-            authorizationModelId: process.env.FGA_MODEL_ID,
-            credentials: {
-                method: CredentialsMethod.ClientCredentials,
-                config: {
-                    apiTokenIssuer: process.env.FGA_API_TOKEN_ISSUER ?? "",
-                    apiAudience: process.env.FGA_API_AUDIENCE ?? "",
-                    clientId: process.env.FGA_CLIENT_ID ?? "",
-                    clientSecret: process.env.FGA_CLIENT_SECRET ?? "",
-                },
-            }
-        });
+        const fga = getFga();
 
         if(data.permission){
             await writePermissions(fga, data);
@@ -83,5 +70,22 @@ async function writeFileRelationship(fga: OpenFgaClient, data: any){
         ],
     }, {
         authorizationModelId: process.env.FGA_MODEL_ID
+    });
+}
+
+export function getFga(): OpenFgaClient{
+    return new OpenFgaClient({
+        apiUrl: process.env.FGA_API_URL,
+        storeId: process.env.FGA_STORE_ID,
+        authorizationModelId: process.env.FGA_MODEL_ID,
+        credentials: {
+            method: CredentialsMethod.ClientCredentials,
+            config: {
+                apiTokenIssuer: process.env.FGA_API_TOKEN_ISSUER ?? "",
+                apiAudience: process.env.FGA_API_AUDIENCE ?? "",
+                clientId: process.env.FGA_CLIENT_ID ?? "",
+                clientSecret: process.env.FGA_CLIENT_SECRET ?? "",
+            },
+        }
     });
 }

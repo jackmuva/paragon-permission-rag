@@ -14,6 +14,7 @@ import {
 } from "./llamaindex/streaming/events";
 import { LlamaIndexStream } from "./llamaindex/streaming/stream";
 import jwt from "jsonwebtoken";
+import {getFga} from "@/app/api/permissions/route";
 
 initObservability();
 initSettings();
@@ -29,15 +30,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const headers = request.headers;
-    let user: string | undefined | (() => string) = undefined;
-
-    if(headers.get("authorization")){
-      const token = headers.get("authorization")?.split(" ")[1];
-      const verified = jwt.verify(token ?? "", process.env.SIGNING_KEY?.replaceAll("\\n", "\n") ?? "");
-      user = verified.sub;
-    }
-
-    console.log(user)
 
     const { messages }: { messages: Message[] } = body;
     const userMessage = messages.pop();
@@ -64,13 +56,8 @@ export async function POST(request: NextRequest) {
         )?.annotations;
     }
 
-    // retrieve document Ids from the annotations of all messages (if any) and create chat engine with index
-    const allAnnotations: JSONValue[] = [...messages, userMessage].flatMap(
-      (message) => {
-        return message.annotations ?? [];
-      },
-    );
-    const ids = retrieveDocumentIds(allAnnotations);
+    const ids = await getPermittedDocuments(headers);
+    console.log(ids);
     const chatEngine = await createChatEngine(ids);
 
     // Convert message content from Vercel/AI format to LlamaIndex/OpenAI format
@@ -113,4 +100,28 @@ export async function POST(request: NextRequest) {
   } finally {
     clearTimeout(streamTimeout);
   }
+}
+
+async function getPermittedDocuments(headers: Headers): Promise<Array<string>>{
+  let user: string | undefined | (() => string) = undefined;
+
+  if(headers.get("authorization")){
+    const token = headers.get("authorization")?.split(" ")[1];
+    const verified = jwt.verify(token ?? "", process.env.SIGNING_KEY?.replaceAll("\\n", "\n") ?? "");
+    user = verified.sub;
+  }
+
+  const fga = getFga();
+
+  const response = await fga.listObjects({
+    user: "user:" + user,
+    relation: "owner",
+    type: "doc",
+  }, {
+    authorizationModelId: process.env.FGA_MODEL_ID,
+  });
+
+  return response.objects.map((document) => {
+    return document.split(":")[1]
+  });
 }
