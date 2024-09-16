@@ -13,7 +13,6 @@ import {
   createStreamTimeout,
 } from "./llamaindex/streaming/events";
 import { LlamaIndexStream } from "./llamaindex/streaming/stream";
-import jwtDecode from "jwt-decode";
 import jwt from "jsonwebtoken";
 
 initObservability();

@@ -2,7 +2,7 @@ import {
   ContextChatEngine,
   MetadataFilter,
   MetadataFilters,
-  Settings,
+  Settings, SimpleChatEngine,
 } from "llamaindex";
 import { getDataSource } from "./index";
 
@@ -13,9 +13,18 @@ export async function createChatEngine(documentIds?: string[]) {
       `StorageContext is empty - call 'npm run generate' to generate the storage first`,
     );
   }
+
+  const permissionFilters = generateFilters(documentIds || []);
+
+  if(!permissionFilters.filters.length){
+    return new SimpleChatEngine({
+      llm:Settings.llm,
+    });
+  }
+
   const retriever = index.asRetriever({
     similarityTopK: process.env.TOP_K ? parseInt(process.env.TOP_K) : 3,
-    filters: generateFilters(documentIds || []),
+    filters: permissionFilters,
   });
 
   return new ContextChatEngine({
@@ -26,25 +35,18 @@ export async function createChatEngine(documentIds?: string[]) {
 }
 
 export function generateFilters(documentIds: string[]): MetadataFilters {
-  // public documents don't have the "private" field or it's set to "false"
-  const publicDocumentsFilter: MetadataFilter = {
-    key: "private",
-    value: ["true"],
-    operator: "nin",
-  };
+  const filters: Array<MetadataFilter>= []
 
-  // if no documentIds are provided, only retrieve information from public documents
-  if (!documentIds.length) return { filters: [publicDocumentsFilter] };
+  documentIds.forEach((documentId) => {
+    filters.push({
+      key: "fileId",
+      value: documentId,
+      operator: "==",
+    })
+  });
 
-  const privateDocumentsFilter: MetadataFilter = {
-    key: "doc_id",
-    value: documentIds,
-    operator: "in",
-  };
-
-  // if documentIds are provided, retrieve information from public and private documents
   return {
-    filters: [publicDocumentsFilter, privateDocumentsFilter],
-    condition: "or",
+    filters: filters,
+    condition: "or"
   };
 }
