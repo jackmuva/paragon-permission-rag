@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {getFga, writeFileRelationship, writePermissions} from "@/app/api/permissions/index"; // OR import { CredentialsMethod, OpenFgaClient } from '@openfga/sdk';
+import {getFga, updatePermissions, writeFileRelationship, writePermissions} from "@/app/api/permissions/index"; // OR import { CredentialsMethod, OpenFgaClient } from '@openfga/sdk';
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,7 +9,10 @@ export async function POST(request: NextRequest) {
     try {
         const fga = getFga();
 
-        if(data.permission){
+        if(data.type && data.type === "update"){
+            await updatePermissions(fga, data);
+        }
+        else if(data.permission){
             await writePermissions(fga, data);
         } else{
             await writeFileRelationship(fga, data);

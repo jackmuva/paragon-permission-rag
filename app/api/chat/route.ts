@@ -67,7 +67,6 @@ export async function POST(request: NextRequest) {
     console.log("fga permitted documents:");
     console.log(ids);
     const verifiedIds = await checkThirdPartyPermissions(ids, user);
-    console.log(verifiedIds);
     const chatEngine = await createChatEngine(verifiedIds);
 
     // Convert message content from Vercel/AI format to LlamaIndex/OpenAI format
