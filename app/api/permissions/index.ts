@@ -263,7 +263,7 @@ async function checkSpecificThirdParty(documentIds: Array<string>,
                                        jwt: string,
                                        integration: string,
                                        verificationUrl: string): Promise<Array<string>>{
-    const docsOfIntegration = getDocumentsOfIntegration(documentIds, integration);
+    const docsOfIntegration = await getDocumentsOfIntegration(documentIds, integration);
 
     const response = await fetch(verificationUrl, {
         method: "POST",
