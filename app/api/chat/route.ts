@@ -62,6 +62,8 @@ export async function POST(request: NextRequest) {
         )?.annotations;
     }
 
+    console.log(user);
+
     //gets permitted document IDs using fga graph (managed cache), then checks third party permissions
     const ids = await getPermittedDocuments(user);
     console.log("fga permitted documents:");

@@ -6,7 +6,8 @@ import { runPipeline } from "./pipeline";
 export async function uploadDocument(
   index: VectorStoreIndex | LlamaCloudIndex,
   raw: string,
-  fileId: string
+  fileId: string,
+  source: string,
 ): Promise<string[]> {
   const [header, content] = raw.split(",");
   const mimeType = header.replace("data:", "").replace(";base64", "");
@@ -20,6 +21,7 @@ export async function uploadDocument(
       ...document.metadata,
       fileId: fileId,
       file_name: filename,
+      source: source,
       private: "true", // to separate private uploads from public documents
     };
   }

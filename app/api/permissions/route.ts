@@ -5,24 +5,27 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-    const { data } = await request.json();
+    const response = await request.json();
+
     try {
         const fga = getFga();
 
-        if(data.type && data.type === "update"){
-            await updatePermissions(fga, data);
+        if(response.type && response.type === "update"){
+            console.log("updating");
+            await updatePermissions(fga, response.data, response.source);
         }
-        else if(data.permission){
-            await writePermissions(fga, data);
+        else if(response.data.permission){
+            console.log("Writing new permission");
+            await writePermissions(fga, response.data, response.source);
         } else{
-            await writeFileRelationship(fga, data);
+            await writeFileRelationship(fga, response.data);
         }
 
         return NextResponse.json(
             { status: 200 }
         );
     } catch (error) {
-        console.log(data);
+        console.log(response);
         console.error("[Permissions API]", error);
         return NextResponse.json(
             { error: (error as Error).message },

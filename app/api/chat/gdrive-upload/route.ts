@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
       metadata:{
         URL: "Google Drive filename:" + contents.filename,
         fileId: contents.fileId,
+        source: contents.source,
       }})];
 
     const index = await getDataSource();

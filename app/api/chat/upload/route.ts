@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     const base64 = data.base64;
     const fileId = data.fileId;
+    const source = data.source;
 
     if (!base64) {
       return NextResponse.json(
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(await uploadDocument(index, base64, fileId ?? ""));
+    return NextResponse.json(await uploadDocument(index, base64, fileId ?? "", source ?? ""));
   } catch (error) {
     console.error("[Upload API]", error);
     return NextResponse.json(
