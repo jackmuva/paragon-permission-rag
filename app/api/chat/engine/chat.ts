@@ -23,6 +23,7 @@ export async function createChatEngine(documentIds?: string[]) {
   }
   console.log("using context from the following documents");
   console.log(documentIds);
+
   const retriever = index.asRetriever({
     similarityTopK: process.env.TOP_K ? parseInt(process.env.TOP_K) : 3,
     filters: permissionFilters,

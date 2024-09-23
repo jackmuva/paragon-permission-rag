@@ -13,7 +13,7 @@ import {
 } from "./llamaindex/streaming/events";
 import { LlamaIndexStream } from "./llamaindex/streaming/stream";
 import jwt from "jsonwebtoken";
-import {checkThirdPartyPermissions, getFga, getPermittedDocuments} from "@/app/api/permissions";
+import {checkThirdPartyPermissions, getPermittedDocuments} from "@/app/api/permissions";
 
 initObservability();
 initSettings();
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         )?.annotations;
     }
 
-    console.log(user);
+    console.log("logged in user: " + user);
 
     //gets permitted document IDs using fga graph (managed cache), then checks third party permissions
     const ids = await getPermittedDocuments(user);

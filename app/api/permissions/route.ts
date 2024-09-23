@@ -13,12 +13,16 @@ export async function POST(request: NextRequest) {
         if(response.type && response.type === "update"){
             console.log("updating");
             await updatePermissions(fga, response.data, response.source);
-        }
-        else if(response.data.permission){
+        } else if(response.type && response.type === "permission"){
             console.log("Writing new permission");
             await writePermissions(fga, response.data, response.source);
-        } else{
+        } else if(response.type && response.type === "parent"){
             await writeFileRelationship(fga, response.data);
+        } else{
+            return NextResponse.json(
+                { error : "data format not supported" },
+                { status: 400 },
+            );
         }
 
         return NextResponse.json(

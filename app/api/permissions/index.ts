@@ -20,7 +20,7 @@ export function getFga(): OpenFgaClient{
 
 export async function writePermissions(fga: OpenFgaClient, data: any, source: string){
     const object = data.object;
-    const subject = data.permission;
+    const subject = data.subject;
 
     if(object.objectType === "application/vnd.google-apps.folder" || object.objectType === "folder"){
         object.objectType = "folder";
@@ -29,24 +29,24 @@ export async function writePermissions(fga: OpenFgaClient, data: any, source: st
         object.objectType = "doc";
     }
 
-    if(subject.permissionSubjectType === "group"){
-        subject.permissionSubjectType = "group";
+    if(subject.subjectType === "group"){
+        subject.subjectType = "group";
     } else{
-        subject.permissionSubjectType = "user";
+        subject.subjectType = "user";
     }
 
-    if(subject.permissionType === "editor"){
-        subject.permissionType = "writer";
-    }else if(subject.permissionType === "viewer"){
-        subject.permissionType = "reader";
+    if(subject.relationshipType === "editor"){
+        subject.relationshipType = "writer";
+    }else if(subject.relationshipType === "viewer"){
+        subject.relationshipType = "reader";
     }
 
 
     await fga.write({
         writes: [
             {
-                "user": subject.permissionSubjectType + ":" + subject.permissionSubject,
-                "relation":subject.permissionType,
+                "user": subject.subjectType + ":" + subject.subjectId,
+                "relation":subject.relationshipType,
                 "object": object.objectType + ":" + object.objectId
             }
         ],
@@ -209,15 +209,20 @@ export async function checkThirdPartyPermissions(documentIds: Array<string>, use
     let verifiedIds: Array<string> = []
 
     for(const integration of integrations){
-        let verUrl = "";
-        if(integration === "googledrive"){
-            verUrl = process.env.GOOGLE_DRIVE_VERIFICATION ?? "";
-        } else if(integration === "dropbox"){
-            verUrl = process.env.DROPBOX_VERIFICATION ?? "";
+        try {
+            let verUrl = "";
+            if (integration === "googledrive") {
+                verUrl = process.env.GOOGLE_DRIVE_VERIFICATION ?? "";
+            } else if (integration === "dropbox") {
+                verUrl = process.env.DROPBOX_VERIFICATION ?? "";
+            }
+            if (verUrl) {
+                let verified = await checkSpecificThirdParty(documentIds, userId, token, integration, verUrl);
+                verifiedIds = verifiedIds.concat(verified);
+            }
+        }catch(err){
+            console.log("Unable to verify " + integration + " : " + err);
         }
-
-        let verified = await checkSpecificThirdParty(documentIds, userId, token, integration, verUrl);
-        verifiedIds = verifiedIds.concat(verified);
     }
     return verifiedIds;
 }
@@ -275,8 +280,6 @@ async function checkSpecificThirdParty(documentIds: Array<string>,
     })
         .then((response) => response.json())
         .catch((error) => console.log("Error checking with " + integration + ": " + error));
-
-    console.log(response);
 
     return await response.permittedFiles.map((permittedFile: {fileId: string, permitted: boolean}) => {
         if(permittedFile.permitted){
