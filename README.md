@@ -1,5 +1,14 @@
 This is a [LlamaIndex](https://www.llamaindex.ai/) project using [Next.js](https://nextjs.org/) bootstrapped with [`create-llama`](https://github.com/run-llama/LlamaIndexTS/tree/main/packages/create-llama).
 
+## Custom Components from this tutorial
+Most of the code generated is started code from `create-llama`. 
+The custom code for this tutorial can be found in:
+- `app/components/integration-ui`: These are frontend modifications that allow users to authenticate and enable integrations
+- `app/api/permissions`: POST endpoint and custom logic for receiving and processing permissions data
+- `app/api/gdrive-upload`: POST endpoint to receive Google Drive native files like doc, slides, sheets
+- `app/api/chat/engine/chat.ts`: added logic for metadata filtering to vector database
+- `app/api/route.ts`: the default chat API will now looks for permissions from authenticated users
+
 ## Getting Started
 
 First, install the dependencies:
